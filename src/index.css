@@ -1,5 +1,15 @@
 @import "tailwindcss";
 
+@theme {
+  --color-canvas: var(--app-canvas);
+  --color-surface: var(--app-surface);
+  --color-ink: var(--app-ink);
+  --color-muted: var(--app-muted);
+  --color-subtle: var(--app-subtle);
+  --color-soft: var(--app-soft);
+  --color-hairline: var(--app-hairline);
+}
+
 /* ─── Inter Variable Font ──────────────────────────── */
 @font-face {
   font-family: 'Inter';
@@ -50,17 +60,19 @@
 /* ─── Liquid Card Shell ────────────────────────────── */
 @layer utilities {
   .liquid-card-shell {
-    background: var(--app-surface);
+    background-color: var(--app-surface);
     border: 1px solid var(--app-hairline);
     box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 1px rgba(0,0,0,.04);
   }
 
-  .liquid-card-inner {
-    background: var(--app-surface);
+  .liquid-row {
+    background-color: var(--app-surface);
+    border: 1px solid transparent;
+    transition: all 0.2s;
   }
-
-  .liquid-inner-strong {
-    background: #ffffff;
+  .liquid-row:hover {
+    border-color: var(--app-hairline);
+    background-color: var(--app-canvas);
   }
 
   /* Label micro-type */
@@ -74,7 +86,7 @@
 
   /* Sidebar nav active indicator */
   .nav-active {
-    background: #ffffff;
+    background-color: #ffffff;
     border: 1px solid var(--app-hairline);
     box-shadow: 0 1px 2px rgba(0,0,0,.06);
     color: var(--app-ink);
@@ -85,19 +97,19 @@
     color: var(--app-muted);
     border: 1px solid transparent;
   }
-  .nav-idle:hover { background: var(--app-soft); color: var(--app-ink); }
+  .nav-idle:hover { background-color: var(--app-soft); color: var(--app-ink); }
 
   /* Track progress bar row */
   .progress-row { display: flex; flex-direction: column; gap: 4px; }
   .progress-bar-bg {
     height: 4px;
-    background: var(--app-soft);
+    background-color: var(--app-soft);
     border-radius: 99px;
     overflow: hidden;
   }
   .progress-bar-fill {
     height: 100%;
-    background: var(--app-ink);
+    background-color: var(--app-ink);
     border-radius: 99px;
     transition: width 0.6s cubic-bezier(.4,0,.2,1);
   }

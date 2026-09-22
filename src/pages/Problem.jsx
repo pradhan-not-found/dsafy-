@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
 import { getProblemById } from '../data/problems';
 import { useApp } from '../context/AppContext';
-import { PlayCircle, CheckCircle2 } from 'lucide-react';
+import { PlayCircle, CheckCircle2, ChevronLeft } from 'lucide-react';
 
 export default function Problem() {
   const { problemId } = useParams();
@@ -11,12 +11,12 @@ export default function Problem() {
   const problem = getProblemById(problemId);
   const [code, setCode] = useState(problem?.starterCode?.javascript || '');
   const [output, setOutput] = useState('');
-  const [activeTab, setActiveTab] = useState('description'); // description, testcases, result
+  const [activeTab, setActiveTab] = useState('description');
   const [isRunning, setIsRunning] = useState(false);
 
   if (!problem) return (
-    <div className="flex h-screen items-center justify-center bg-gray-50 text-gray-500">
-      Problem not found. <Link to="/problems" className="ml-2 text-black font-bold">Go back</Link>
+    <div className="flex h-screen items-center justify-center text-sm text-[var(--app-muted)]">
+      Problem not found. <Link to="/problems" className="ml-2 text-[var(--app-ink)] font-semibold hover:underline">Go back</Link>
     </div>
   );
 
@@ -25,13 +25,11 @@ export default function Problem() {
     setActiveTab('result');
     setOutput('Running test cases...');
     
-    // Simulate slight network delay for realism
     setTimeout(() => {
       try {
         let results = [];
         let allPassed = true;
         
-        // Extract function name, basic regex to find 'var funcName = function' or 'function funcName'
         const funcMatch = code.match(/(?:var|let|const)\s+([a-zA-Z0-9_]+)\s*=\s*function|function\s+([a-zA-Z0-9_]+)/);
         const funcName = funcMatch ? (funcMatch[1] || funcMatch[2]) : null;
 
@@ -43,10 +41,8 @@ export default function Problem() {
         `)();
 
         problem.testCases.forEach((tc, idx) => {
-          // Parse inputs
           let args = [];
           if (tc.input.includes('=')) {
-             // e.g. "nums=[2,7,11,15], target=9"
              const parts = tc.input.split(', ');
              args = parts.map(p => JSON.parse(p.split('=')[1]));
           } else {
@@ -55,7 +51,6 @@ export default function Problem() {
 
           const actual = userFunc(...args);
           const actualStr = JSON.stringify(actual);
-          // compare
           const passed = actualStr === tc.expected || actualStr === tc.expected.replace(/\s/g, '');
           
           if (!passed) allPassed = false;
@@ -77,17 +72,17 @@ export default function Problem() {
   };
 
   return (
-    <div className="flex flex-col h-screen" style={{ background: 'var(--app-canvas)' }}>
+    <div className="flex flex-col h-screen bg-[var(--app-canvas)] text-[var(--app-ink)]">
       {/* Top Navbar */}
-      <nav 
-        className="h-12 flex items-center justify-between px-4 shrink-0"
-        style={{ background: 'var(--app-canvas)', borderBottom: '1px solid var(--app-hairline)' }}
-      >
+      <nav className="h-14 flex items-center justify-between px-6 shrink-0 border-b border-[var(--app-hairline)] bg-[var(--app-surface)]">
         <div className="flex items-center gap-4">
-          <Link to="/problems" className="label hover:opacity-70 transition-opacity">← Back</Link>
-          <div className="h-4 w-px" style={{ background: 'var(--app-hairline)' }} />
-          <h1 style={{ fontSize: '13px', fontWeight: 600, color: 'var(--app-ink)' }}>{problem.lcId}. {problem.title}</h1>
-          <span className="label" style={{ padding: '2px 6px', background: 'var(--app-soft)', borderRadius: 4, letterSpacing: 0 }}>
+          <Link to="/problems" className="flex items-center gap-1.5 text-xs font-semibold text-[var(--app-muted)] hover:text-[var(--app-ink)] transition-colors">
+            <ChevronLeft size={16} />
+            Back
+          </Link>
+          <div className="h-4 w-px bg-[var(--app-hairline)]" />
+          <h1 className="text-sm font-semibold">{problem.lcId}. {problem.title}</h1>
+          <span className="text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded bg-[var(--app-soft)] text-[var(--app-muted)]">
             {problem.difficulty}
           </span>
         </div>
@@ -95,16 +90,14 @@ export default function Problem() {
           <button 
             onClick={handleRun} 
             disabled={isRunning} 
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-colors"
-            style={{ fontSize: '12px', fontWeight: 600, background: 'var(--app-soft)', color: 'var(--app-ink)' }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold bg-[var(--app-soft)] text-[var(--app-ink)] hover:bg-[var(--app-hairline)] transition-colors"
           >
             <PlayCircle size={14} /> Run Code
           </button>
           <button 
             onClick={handleRun} 
             disabled={isRunning} 
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-colors hover:opacity-90"
-            style={{ fontSize: '12px', fontWeight: 600, background: 'var(--app-ink)', color: '#fff' }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold bg-[var(--app-ink)] text-white hover:opacity-90 transition-opacity"
           >
              <CheckCircle2 size={14} /> Submit
           </button>
@@ -112,52 +105,53 @@ export default function Problem() {
       </nav>
 
       {/* Split Pane */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex min-h-0">
         {/* Left Pane (Description & Output) */}
-        <div className="w-1/2 flex flex-col" style={{ borderRight: '1px solid var(--app-hairline)', background: 'var(--app-surface)' }}>
-          <div className="flex px-2 pt-2" style={{ borderBottom: '1px solid var(--app-hairline)', background: 'var(--app-canvas)' }}>
+        <div className="w-1/2 flex flex-col border-r border-[var(--app-hairline)] bg-[var(--app-surface)]">
+          <div className="flex px-4 pt-2 border-b border-[var(--app-hairline)] bg-[var(--app-canvas)]">
             <button 
-              className="px-4 py-2 label"
-              style={{
-                borderBottom: activeTab === 'description' ? '2px solid var(--app-ink)' : '2px solid transparent',
-                color: activeTab === 'description' ? 'var(--app-ink)' : 'var(--app-muted)',
-                background: activeTab === 'description' ? 'var(--app-surface)' : 'transparent',
-                letterSpacing: 0
-              }}
+              className={`px-4 py-2 text-xs font-semibold uppercase tracking-wider border-b-2 transition-colors ${activeTab === 'description' ? 'border-[var(--app-ink)] text-[var(--app-ink)]' : 'border-transparent text-[var(--app-muted)] hover:text-[var(--app-ink)]'}`}
               onClick={() => setActiveTab('description')}
             >
               Description
             </button>
             <button 
-              className="px-4 py-2 label"
-              style={{
-                borderBottom: activeTab === 'result' ? '2px solid var(--app-ink)' : '2px solid transparent',
-                color: activeTab === 'result' ? 'var(--app-ink)' : 'var(--app-muted)',
-                background: activeTab === 'result' ? 'var(--app-surface)' : 'transparent',
-                letterSpacing: 0
-              }}
+              className={`px-4 py-2 text-xs font-semibold uppercase tracking-wider border-b-2 transition-colors ${activeTab === 'result' ? 'border-[var(--app-ink)] text-[var(--app-ink)]' : 'border-transparent text-[var(--app-muted)] hover:text-[var(--app-ink)]'}`}
               onClick={() => setActiveTab('result')}
             >
               Test Results
             </button>
           </div>
 
-          <div className="flex-1 overflow-auto p-5">
+          <div className="flex-1 overflow-y-auto p-6 no-scrollbar">
             {activeTab === 'description' && (
-              <div className="text-[13px] leading-relaxed" style={{ color: 'var(--app-ink)' }}>
-                <div dangerouslySetInnerHTML={{ __html: problem.description.replace(/\n/g, '<br />').replace(/`([^`]+)`/g, '<code style="background:var(--app-soft);padding:2px 4px;border-radius:4px;font-family:monospace;font-size:11px">$1</code>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />
-                <h3 style={{ fontWeight: 700, marginTop: 24, marginBottom: 12, paddingBottom: 8, borderBottom: '1px solid var(--app-hairline)' }}>Examples</h3>
-                {problem.examples.map((ex, i) => (
-                  <div key={i} className="mb-4 p-4 rounded-lg" style={{ background: 'var(--app-canvas)', border: '1px solid var(--app-hairline)' }}>
-                    <div className="font-mono text-[11px] mb-1"><strong>Input:</strong> {ex.input}</div>
-                    <div className="font-mono text-[11px] mb-1"><strong>Output:</strong> {ex.output}</div>
-                    {ex.explanation && <div className="text-[12px] mt-2" style={{ color: 'var(--app-muted)' }}>{ex.explanation}</div>}
+              <div className="text-sm leading-relaxed space-y-4">
+                <div 
+                  className="prose prose-sm max-w-none text-[var(--app-ink)] prose-p:leading-relaxed prose-pre:bg-[var(--app-soft)] prose-pre:text-[var(--app-ink)]"
+                  dangerouslySetInnerHTML={{ 
+                    __html: problem.description
+                      .replace(/\n/g, '<br />')
+                      .replace(/`([^`]+)`/g, '<code class="bg-[var(--app-soft)] px-1.5 py-0.5 rounded-md font-mono text-xs border border-[var(--app-hairline)]">$1</code>')
+                      .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold">$1</strong>') 
+                  }} 
+                />
+                
+                <div className="pt-6 mt-6 border-t border-[var(--app-hairline)]">
+                  <h3 className="text-sm font-semibold mb-4 uppercase tracking-wider text-[var(--app-muted)]">Examples</h3>
+                  <div className="space-y-4">
+                    {problem.examples.map((ex, i) => (
+                      <div key={i} className="p-4 rounded-lg bg-[var(--app-canvas)] border border-[var(--app-hairline)] space-y-2">
+                        <div className="font-mono text-xs"><strong className="font-semibold font-sans">Input:</strong> {ex.input}</div>
+                        <div className="font-mono text-xs"><strong className="font-semibold font-sans">Output:</strong> {ex.output}</div>
+                        {ex.explanation && <div className="text-xs text-[var(--app-muted)] mt-2 pt-2 border-t border-[var(--app-hairline)]">{ex.explanation}</div>}
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
               </div>
             )}
             {activeTab === 'result' && (
-              <div className="font-mono text-[12px] whitespace-pre-wrap leading-relaxed p-4 rounded-lg min-h-full" style={{ background: 'var(--app-canvas)', border: '1px solid var(--app-hairline)', color: 'var(--app-ink)' }}>
+              <div className="font-mono text-xs whitespace-pre-wrap leading-relaxed p-4 rounded-lg min-h-full bg-[var(--app-canvas)] border border-[var(--app-hairline)]">
                 {output || 'Run the code to see results here.'}
               </div>
             )}
@@ -165,9 +159,9 @@ export default function Problem() {
         </div>
 
         {/* Right Pane (Editor) */}
-        <div className="w-1/2 flex flex-col" style={{ background: 'var(--app-surface)' }}>
-          <div className="h-10 flex items-center px-4" style={{ background: 'var(--app-canvas)', borderBottom: '1px solid var(--app-hairline)' }}>
-            <span className="label" style={{ letterSpacing: 0 }}>JavaScript</span>
+        <div className="w-1/2 flex flex-col bg-[var(--app-surface)]">
+          <div className="h-10 flex items-center px-4 border-b border-[var(--app-hairline)] bg-[var(--app-canvas)]">
+            <span className="text-xs font-semibold uppercase tracking-wider text-[var(--app-muted)]">JavaScript</span>
           </div>
           <div className="flex-1 relative pt-2">
             <Editor
@@ -177,10 +171,10 @@ export default function Problem() {
               theme="light"
               options={{
                 minimap: { enabled: false },
-                fontSize: 13,
+                fontSize: 14,
                 fontFamily: "'JetBrains Mono', 'Fira Code', Consolas, monospace",
-                lineHeight: 22,
-                padding: { top: 8 },
+                lineHeight: 24,
+                padding: { top: 16 },
                 scrollBeyondLastLine: false,
                 smoothScrolling: true,
                 cursorBlinking: "smooth",

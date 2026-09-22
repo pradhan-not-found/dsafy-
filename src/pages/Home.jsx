@@ -1,6 +1,5 @@
-import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { CheckCircle2, AlertCircle, Star, Flame, PlayCircle, Trophy } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Star, Flame, PlayCircle, Trophy, ChevronRight } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { TRACKS, getTotalProblems } from '../data/tracks';
 import { getAllProblems, getProblemsByTrack } from '../data/problems';
@@ -21,68 +20,72 @@ export default function Home() {
   const suggested = allProblems.filter(p => getStatus(p.id) === 'unsolved').sort((a, b) => a.lcId - b.lcId).slice(0, 5);
 
   const stats = [
-    { label: 'Solved',   value: solved.length,   sub: `of ${totalProblems} total`,             icon: <CheckCircle2 size={14} /> },
-    { label: 'Attempted',value: attempted.length, sub: 'keep going',                            icon: <AlertCircle size={14} /> },
-    { label: 'XP',       value: xp,               sub: next === Infinity ? 'max level' : `${next - xp} to next`, icon: <Star size={14} /> },
-    { label: 'Streak',   value: streak,           sub: 'days in a row',                         icon: <Flame size={14} /> },
+    { label: 'Solved',   value: solved.length,   sub: `of ${totalProblems} total`,             icon: <CheckCircle2 size={16} /> },
+    { label: 'Attempted',value: attempted.length, sub: 'keep going',                            icon: <AlertCircle size={16} /> },
+    { label: 'XP',       value: xp,               sub: next === Infinity ? 'max level' : `${next - xp} to next`, icon: <Star size={16} /> },
+    { label: 'Streak',   value: streak,           sub: 'days in a row',                         icon: <Flame size={16} /> },
   ];
 
   return (
-    <div className="p-6 max-w-5xl mx-auto flex flex-col gap-6">
+    <div className="p-6 sm:p-8 max-w-6xl mx-auto flex flex-col gap-6 sm:gap-8 animate-fade-in">
       {/* Greeting */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between pb-2 border-b border-[var(--app-hairline)]">
         <div>
-          <h1 style={{ fontSize: '1.25rem', fontWeight: 700, letterSpacing: '-0.03em', color: 'var(--app-ink)' }}>
+          <h1 className="text-2xl font-bold tracking-tight text-[var(--app-ink)]">
             {greeting()}, Coder
           </h1>
-          <p className="label mt-0.5">Lv. {level} — {title}</p>
+          <p className="text-sm font-medium text-[var(--app-muted)] mt-1">Lv. {level} — {title}</p>
         </div>
       </div>
 
       {/* Stats row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {stats.map((s, i) => (
-          <LiquidCard key={s.label} index={i} className="p-4 flex flex-col gap-1">
-            <div className="flex items-center justify-between">
-              <span className="label">{s.label}</span>
-              <span style={{ color: 'var(--app-subtle)' }}>{s.icon}</span>
-            </div>
-            <div style={{ fontSize: '1.75rem', fontWeight: 700, letterSpacing: '-0.04em', color: 'var(--app-ink)', lineHeight: 1.1 }}>
-              {s.value}
-            </div>
-            <p style={{ fontSize: '11px', color: 'var(--app-muted)' }}>{s.sub}</p>
-          </LiquidCard>
-        ))}
+      <div>
+        <div className="mb-3">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--app-muted)]">Activity Overview</p>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {stats.map((s, i) => (
+            <LiquidCard key={s.label} index={i} className="p-5 flex flex-col gap-2">
+              <div className="flex items-center justify-between text-[var(--app-muted)] mb-1">
+                <span className="text-[10px] font-semibold uppercase tracking-wider">{s.label}</span>
+                {s.icon}
+              </div>
+              <div className="text-3xl font-bold tracking-tighter text-[var(--app-ink)] tabular-nums leading-none">
+                {s.value}
+              </div>
+              <p className="text-xs text-[var(--app-muted)] mt-1 truncate">{s.sub}</p>
+            </LiquidCard>
+          ))}
+        </div>
       </div>
 
       {/* Main two-column */}
-      <div className="grid md:grid-cols-2 gap-4">
+      <div className="grid lg:grid-cols-2 gap-6">
         {/* Active tracks */}
-        <LiquidCard index={4} className="p-5">
-          <div className="flex items-center justify-between mb-4">
-            <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--app-ink)' }}>Active Tracks</span>
-            <Link to="/tracks" className="label hover:opacity-70 transition-opacity">View all →</Link>
+        <LiquidCard index={4} className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-base font-semibold text-[var(--app-ink)]">Active Tracks</h2>
+            <Link to="/tracks" className="text-[10px] font-semibold uppercase tracking-wider text-[var(--app-muted)] hover:text-[var(--app-ink)] transition-colors flex items-center gap-0.5">
+              View all <ChevronRight size={14} />
+            </Link>
           </div>
-          <div className="flex flex-col gap-4">
-            {TRACKS.slice(0, 5).map((track, i) => {
+          <div className="flex flex-col gap-5">
+            {TRACKS.slice(0, 5).map((track) => {
               const probs = getProblemsByTrack(track.id);
               const s = probs.filter(p => getStatus(p.id) === 'solved').length;
               const pct = probs.length ? Math.round((s / probs.length) * 100) : 0;
               return (
                 <Link key={track.id} to={`/tracks/${track.id}`} className="group flex items-start gap-3">
-                  <div
-                    className="size-7 rounded-md flex items-center justify-center shrink-0 mt-0.5"
-                    style={{ background: 'var(--app-soft)', border: '1px solid var(--app-hairline)' }}
-                  >
-                    <Trophy size={12} style={{ color: 'var(--app-muted)' }} />
+                  <div className="size-8 rounded-md bg-[var(--app-soft)] border border-[var(--app-hairline)] flex items-center justify-center shrink-0 mt-0.5">
+                    <Trophy size={14} className="text-[var(--app-muted)]" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-center mb-1">
-                      <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--app-ink)' }} className="truncate">{track.title}</span>
-                      <span className="label shrink-0 ml-2">{s}/{track.totalProblems}</span>
+                    <div className="flex justify-between items-center mb-1.5">
+                      <span className="text-sm font-semibold text-[var(--app-ink)] truncate group-hover:underline">{track.title}</span>
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--app-muted)] shrink-0 ml-2">{s}/{track.totalProblems}</span>
                     </div>
-                    <div className="progress-bar-bg">
-                      <div className="progress-bar-fill" style={{ width: `${pct}%` }} />
+                    <div className="h-1.5 bg-[var(--app-soft)] rounded-full overflow-hidden">
+                      <div className="h-full bg-[var(--app-ink)] transition-all duration-700 ease-out" style={{ width: `${pct}%` }} />
                     </div>
                   </div>
                 </Link>
@@ -92,34 +95,34 @@ export default function Home() {
         </LiquidCard>
 
         {/* Suggested next */}
-        <LiquidCard index={5} className="p-5">
-          <div className="flex items-center justify-between mb-4">
-            <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--app-ink)' }}>Suggested Next</span>
-            <Link to="/problems" className="label hover:opacity-70 transition-opacity">Browse all →</Link>
+        <LiquidCard index={5} className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-base font-semibold text-[var(--app-ink)]">Suggested Next</h2>
+            <Link to="/problems" className="text-[10px] font-semibold uppercase tracking-wider text-[var(--app-muted)] hover:text-[var(--app-ink)] transition-colors flex items-center gap-0.5">
+              Browse all <ChevronRight size={14} />
+            </Link>
           </div>
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col rounded-lg border border-[var(--app-hairline)] overflow-hidden">
             {suggested.length === 0
-              ? <p style={{ fontSize: '12px', color: 'var(--app-muted)' }}>You've solved everything — impressive!</p>
+              ? <div className="p-6 text-sm text-[var(--app-muted)] text-center bg-[var(--app-surface)]">You've solved everything — impressive!</div>
               : suggested.map((p, i) => (
                 <Link
                   key={p.id}
                   to={`/problem/${p.id}`}
-                  className="flex items-center gap-3 px-3 py-2 rounded-lg group transition-all"
-                  style={{ borderBottom: i < suggested.length - 1 ? '1px solid var(--app-hairline)' : 'none' }}
+                  className={`flex items-center gap-3 px-4 py-3 bg-[var(--app-surface)] hover:bg-[var(--app-canvas)] transition-colors group ${
+                    i < suggested.length - 1 ? 'border-b border-[var(--app-hairline)]' : ''
+                  }`}
                 >
-                  <span
-                    className="size-7 flex items-center justify-center rounded shrink-0 font-mono text-[10px] font-bold"
-                    style={{ background: 'var(--app-soft)', color: 'var(--app-muted)' }}
-                  >
+                  <span className="size-7 flex items-center justify-center rounded bg-[var(--app-soft)] border border-[var(--app-hairline)] shrink-0 font-mono text-[10px] font-bold text-[var(--app-muted)]">
                     {p.lcId}
                   </span>
                   <div className="flex-1 min-w-0">
-                    <p style={{ fontSize: '12px', fontWeight: 600, color: 'var(--app-ink)' }} className="truncate">{p.title}</p>
-                    <p style={{ fontSize: '10px', color: 'var(--app-subtle)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                    <p className="text-sm font-semibold text-[var(--app-ink)] truncate group-hover:underline">{p.title}</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--app-muted)] mt-0.5">
                       {p.difficulty}
                     </p>
                   </div>
-                  <PlayCircle size={14} style={{ color: 'var(--app-subtle)', flexShrink: 0 }} />
+                  <PlayCircle size={16} className="text-[var(--app-muted)] group-hover:text-[var(--app-ink)] transition-colors flex-shrink-0" />
                 </Link>
               ))
             }

@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 @theme {
   --color-canvas: var(--app-canvas);
@@ -8,6 +9,24 @@
   --color-subtle: var(--app-subtle);
   --color-soft: var(--app-soft);
   --color-hairline: var(--app-hairline);
+
+  /* prose typography token overrides — keep everything black/stone */
+  --tw-prose-body:       var(--app-ink);
+  --tw-prose-headings:   var(--app-ink);
+  --tw-prose-lead:       var(--app-muted);
+  --tw-prose-links:      var(--app-ink);
+  --tw-prose-bold:       var(--app-ink);
+  --tw-prose-counters:   var(--app-muted);
+  --tw-prose-bullets:    var(--app-muted);
+  --tw-prose-hr:         var(--app-hairline);
+  --tw-prose-quotes:     var(--app-ink);
+  --tw-prose-quote-borders: var(--app-hairline);
+  --tw-prose-captions:   var(--app-muted);
+  --tw-prose-code:       var(--app-ink);
+  --tw-prose-pre-code:   var(--app-ink);
+  --tw-prose-pre-bg:     var(--app-soft);
+  --tw-prose-th-borders: var(--app-hairline);
+  --tw-prose-td-borders: var(--app-hairline);
 }
 
 /* ─── Inter Variable Font ──────────────────────────── */

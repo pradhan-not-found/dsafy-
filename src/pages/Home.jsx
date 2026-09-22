@@ -2,10 +2,14 @@ import { Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { TRACKS, getTotalProblems } from '../data/tracks';
 import { getAllProblems, getProblemsByTrack } from '../data/problems';
-import ProgressBar from '../components/ProgressBar';
-import DifficultyBadge from '../components/DifficultyBadge';
-import StatusIcon from '../components/StatusIcon';
-import { ArrowRight, Zap, Trophy, Flame, Target, BookOpen, Code2 } from 'lucide-react';
+
+function ProgressBar({ value }) {
+  return (
+    <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+      <div className="h-full bg-black transition-all duration-500" style={{ width: `${Math.min(100, Math.max(0, value))}%` }} />
+    </div>
+  );
+}
 
 export default function Home() {
   const { xp, streak, solved, attempted, getStatus, getLevel } = useApp();
@@ -13,115 +17,65 @@ export default function Home() {
   const allProblems = getAllProblems();
   const totalProblems = getTotalProblems();
 
-  // Recent problems (last 5 attempted or solved)
-  const recent = allProblems
-    .filter(p => getStatus(p.id) !== 'unsolved')
-    .slice(0, 5);
-
-  // Suggested next problems (unsolved Easy first)
-  const suggested = allProblems
-    .filter(p => getStatus(p.id) === 'unsolved')
-    .sort((a, b) => {
-      const diff = { Easy: 0, Medium: 1, Hard: 2 };
-      return diff[a.difficulty] - diff[b.difficulty];
-    })
-    .slice(0, 5);
+  const recent = allProblems.filter(p => getStatus(p.id) !== 'unsolved').slice(0, 5);
+  const suggested = allProblems.filter(p => getStatus(p.id) === 'unsolved').sort((a, b) => a.lcId - b.lcId).slice(0, 5);
 
   const levelProgress = next === Infinity ? 100 : Math.round((xp / next) * 100);
 
   return (
     <div className="animate-fade-in">
-      {/* Hero Banner */}
-      <div style={{
-        background: 'linear-gradient(135deg, rgba(99,102,241,0.08) 0%, rgba(34,211,238,0.05) 100%)',
-        border: '1px solid var(--border-subtle)',
-        borderRadius: 'var(--radius-xl)',
-        padding: '2rem',
-        marginBottom: '2rem',
-        position: 'relative',
-        overflow: 'hidden',
-      }}>
-        <div style={{
-          position: 'absolute', top: -60, right: -60,
-          width: 240, height: 240,
-          background: 'radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 70%)',
-          borderRadius: '50%',
-        }} />
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1.5rem' }}>
-          <div>
-            <div className="hero-badge" style={{ display: 'inline-flex', marginBottom: '0.75rem' }}>
-              <Zap size={14} /> DSA Practice Platform
-            </div>
-            <h1 style={{ fontSize: '2rem', fontWeight: 900, letterSpacing: '-0.03em', marginBottom: '0.5rem' }}>
-              Welcome back, <span className="gradient-text">Coder!</span>
-            </h1>
-            <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-base)' }}>
-              {solved.length} solved · {attempted.length} attempted · {totalProblems - solved.length - attempted.length} remaining
-            </p>
-          </div>
-          <Link to="/tracks" className="btn btn-primary btn-lg">
-            Continue Learning <ArrowRight size={18} />
-          </Link>
+      <div className="bg-gray-50 border border-gray-200 rounded-2xl p-8 mb-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div>
+          <div className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">DSA Practice Platform</div>
+          <h1 className="text-3xl font-black tracking-tight mb-2 text-black">
+            Welcome back, Coder.
+          </h1>
+          <p className="text-gray-500 font-medium">
+            {solved.length} solved · {attempted.length} attempted · {totalProblems - solved.length - attempted.length} remaining
+          </p>
         </div>
-
-        {/* Level Progress */}
-        <div style={{ marginTop: '1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-            <span style={{ fontSize: 'var(--text-sm)', fontWeight: 700, color: 'var(--brand-primary-light)' }}>
-              Level {level} — {title}
-            </span>
-            <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
-              {xp} / {next === Infinity ? '∞' : next} XP
-            </span>
+        <div className="w-full md:w-64">
+          <div className="flex justify-between text-xs font-bold mb-2">
+            <span className="text-black">Level {level} — {title}</span>
+            <span className="text-gray-500">{xp} / {next === Infinity ? 'MAX' : next} XP</span>
           </div>
           <ProgressBar value={levelProgress} />
         </div>
       </div>
 
-      {/* Stats Row */}
-      <div className="stats-grid mb-xl">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
         {[
-          { label: 'Problems Solved', value: solved.length, icon: '✅', color: 'var(--diff-easy)' },
-          { label: 'Total XP', value: xp, icon: '⚡', color: 'var(--accent-amber)' },
-          { label: 'Day Streak', value: `${streak}🔥`, icon: '🗓️', color: 'var(--accent-rose)' },
-          { label: 'Tracks Started', value: TRACKS.filter(t => getProblemsByTrack(t.id).some(p => getStatus(p.id) !== 'unsolved')).length, icon: '📚', color: 'var(--brand-primary-light)' },
-          { label: 'Easy Solved', value: allProblems.filter(p => p.difficulty === 'Easy' && getStatus(p.id) === 'solved').length, icon: '🟢', color: 'var(--diff-easy)' },
-          { label: 'Medium Solved', value: allProblems.filter(p => p.difficulty === 'Medium' && getStatus(p.id) === 'solved').length, icon: '🟡', color: 'var(--diff-medium)' },
+          { label: 'Solved', value: solved.length },
+          { label: 'Total XP', value: xp },
+          { label: 'Streak', value: streak },
+          { label: 'Tracks', value: TRACKS.filter(t => getProblemsByTrack(t.id).some(p => getStatus(p.id) !== 'unsolved')).length },
         ].map((s, i) => (
-          <div key={i} className={`stat-card animate-fade-in stagger-${i + 1}`}>
-            <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>{s.icon}</div>
-            <div className="stat-value" style={{ background: `linear-gradient(135deg, ${s.color}, ${s.color}88)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              {s.value}
-            </div>
-            <div className="stat-label">{s.label}</div>
+          <div key={i} className="p-6 bg-white border border-gray-200 rounded-xl text-center">
+            <div className="text-3xl font-black tracking-tight text-black">{s.value}</div>
+            <div className="text-[10px] uppercase tracking-widest font-bold text-gray-400 mt-1">{s.label}</div>
           </div>
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-        {/* Tracks Overview */}
+      <div className="grid md:grid-cols-2 gap-10">
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h2 className="section-title">
-              <BookOpen size={18} style={{ display: 'inline', marginRight: 6, verticalAlign: 'middle' }} />
-              Learning Tracks
-            </h2>
-            <Link to="/tracks" className="btn btn-ghost btn-sm">View all <ArrowRight size={13} /></Link>
+          <div className="flex justify-between items-end border-b border-gray-200 pb-2 mb-6">
+            <h2 className="text-lg font-bold tracking-tight">Learning Tracks</h2>
+            <Link to="/tracks" className="text-xs font-bold text-gray-500 hover:text-black transition-colors">View all →</Link>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {TRACKS.slice(0, 6).map((track, i) => {
+          <div className="flex flex-col gap-4">
+            {TRACKS.slice(0, 6).map((track) => {
               const trackProblems = getProblemsByTrack(track.id);
               const s = trackProblems.filter(p => getStatus(p.id) === 'solved').length;
               const pct = trackProblems.length ? Math.round((s / trackProblems.length) * 100) : 0;
               return (
-                <Link key={track.id} to={`/tracks/${track.id}`} style={{ textDecoration: 'none' }}>
-                  <div className={`card animate-fade-in stagger-${i + 1}`} style={{ padding: '0.875rem 1rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-                      <span style={{ fontSize: '1.1rem' }}>{track.icon}</span>
-                      <span style={{ fontWeight: 600, fontSize: 'var(--text-sm)', flex: 1 }}>{track.title}</span>
-                      <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>{s}/{track.totalProblems}</span>
+                <Link key={track.id} to={`/tracks/${track.id}`} className="group block">
+                  <div className="p-4 bg-white border border-gray-200 rounded-lg group-hover:border-black transition-colors">
+                    <div className="flex justify-between items-center mb-3">
+                      <span className="font-bold text-sm">{track.title}</span>
+                      <span className="text-xs font-bold text-gray-400">{s}/{track.totalProblems}</span>
                     </div>
-                    <ProgressBar value={pct} color={track.color} className="thin" />
+                    <ProgressBar value={pct} />
                   </div>
                 </Link>
               );
@@ -129,55 +83,26 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Next Up & Recent */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          {/* Suggested */}
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <h2 className="section-title">
-                <Target size={18} style={{ display: 'inline', marginRight: 6, verticalAlign: 'middle' }} />
-                Next Up
-              </h2>
-              <Link to="/problems" className="btn btn-ghost btn-sm">Browse all <ArrowRight size={13} /></Link>
-            </div>
-            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
-              {suggested.slice(0, 5).map((p, i) => (
-                <Link key={p.id} to={`/problem/${p.id}`} className="problem-row">
-                  <StatusIcon problemId={p.id} />
-                  <div>
-                    <div style={{ fontSize: 'var(--text-sm)', fontWeight: 500 }}>{p.lcId}. {p.title}</div>
-                    <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>{p.track.replace(/-/g, ' ')}</div>
-                  </div>
-                  <DifficultyBadge difficulty={p.difficulty} />
-                  <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{p.acceptance}%</span>
-                </Link>
-              ))}
-              {suggested.length === 0 && (
-                <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                  🎉 You've solved everything! Legendary!
-                </div>
-              )}
-            </div>
+        <div>
+          <div className="flex justify-between items-end border-b border-gray-200 pb-2 mb-6">
+            <h2 className="text-lg font-bold tracking-tight">Suggested Next</h2>
+            <Link to="/problems" className="text-xs font-bold text-gray-500 hover:text-black transition-colors">Browse all →</Link>
           </div>
-
-          {/* Recent Activity */}
-          {recent.length > 0 && (
-            <div>
-              <h2 className="section-title mb-md">
-                <Flame size={18} style={{ display: 'inline', marginRight: 6, verticalAlign: 'middle' }} />
-                Recent Activity
-              </h2>
-              <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
-                {recent.map((p) => (
-                  <Link key={p.id} to={`/problem/${p.id}`} className="problem-row">
-                    <StatusIcon problemId={p.id} />
-                    <div style={{ fontSize: 'var(--text-sm)', fontWeight: 500 }}>{p.lcId}. {p.title}</div>
-                    <DifficultyBadge difficulty={p.difficulty} />
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
+          <div className="border border-gray-200 rounded-xl overflow-hidden bg-white">
+            {suggested.map((p) => (
+              <Link key={p.id} to={`/problem/${p.id}`} className="flex items-center justify-between p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors last:border-b-0">
+                <div>
+                  <div className="text-sm font-bold">{p.lcId}. {p.title}</div>
+                  <div className="text-xs text-gray-500 font-medium mt-0.5">{p.track.replace(/-/g, ' ')}</div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-[10px] uppercase tracking-widest font-bold text-gray-500">{p.difficulty}</span>
+                  <span className="text-xs font-mono text-gray-400">{p.acceptance}%</span>
+                </div>
+              </Link>
+            ))}
+            {suggested.length === 0 && <div className="p-8 text-center text-gray-500 text-sm font-medium">You've solved everything.</div>}
+          </div>
         </div>
       </div>
     </div>

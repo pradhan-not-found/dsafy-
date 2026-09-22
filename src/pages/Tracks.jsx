@@ -2,88 +2,52 @@ import { Link } from 'react-router-dom';
 import { TRACKS } from '../data/tracks';
 import { getProblemsByTrack } from '../data/problems';
 import { useApp } from '../context/AppContext';
-import ProgressBar from '../components/ProgressBar';
-import { Clock, Layers, ArrowRight, Lock } from 'lucide-react';
 
 export default function Tracks() {
   const { getStatus } = useApp();
 
-  const difficultyOrder = { 'Beginner': 0, 'Beginner-Intermediate': 1, 'Intermediate': 2, 'Advanced': 3 };
-
   return (
     <div className="animate-fade-in">
-      <div className="mb-xl">
-        <h1 className="page-title">Learning Tracks</h1>
-        <p className="page-subtitle">Master DSA step by step — from arrays to advanced graphs and dynamic programming.</p>
+      <div className="mb-12 border-b border-gray-200 pb-6">
+        <h1 className="text-3xl font-black tracking-tight mb-2">Learning Tracks</h1>
+        <p className="text-gray-500 font-medium">Master Data Structures and Algorithms systematically.</p>
       </div>
 
-      {/* Difficulty Groups */}
       {['Beginner', 'Beginner-Intermediate', 'Intermediate', 'Advanced'].map(diff => {
-        const group = TRACKS.filter(t => t.difficulty === diff);
+        const group = TRACKS.filter(t => t.difficulty === diff || (diff === 'Intermediate' && t.difficulty === 'Intermediate-Advanced'));
         if (!group.length) return null;
         return (
-          <div key={diff} className="mb-xl">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-              <h2 className="section-title">{diff}</h2>
-              <div style={{ flex: 1, height: 1, background: 'var(--border-subtle)' }} />
-              <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 600 }}>
-                {group.length} tracks
-              </span>
+          <div key={diff} className="mb-12">
+            <div className="flex items-center gap-4 mb-6">
+              <h2 className="text-sm font-bold uppercase tracking-widest text-black">{diff}</h2>
+              <div className="flex-1 h-px bg-gray-200" />
+              <span className="text-xs font-bold text-gray-400">{group.length} tracks</span>
             </div>
-            <div className="tracks-grid">
-              {group.map((track, i) => {
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {group.map((track) => {
                 const problems = getProblemsByTrack(track.id);
                 const s = problems.filter(p => getStatus(p.id) === 'solved').length;
                 const pct = problems.length ? Math.round((s / problems.length) * 100) : 0;
-                const started = s > 0;
                 const completed = pct === 100;
 
                 return (
                   <Link
                     key={track.id}
                     to={`/tracks/${track.id}`}
-                    className={`track-card animate-fade-in stagger-${(i % 5) + 1}`}
-                    style={{ textDecoration: 'none' }}
+                    className="group flex flex-col p-6 bg-white border border-gray-200 rounded-xl hover:border-black transition-all"
                   >
-                    <div style={{
-                      position: 'absolute', top: 0, left: 0, right: 0, height: 3,
-                      background: `linear-gradient(90deg, ${track.color}, ${track.color}66)`,
-                      opacity: started ? 1 : 0.3,
-                    }} />
-
-                    {completed && (
-                      <div style={{
-                        position: 'absolute', top: 12, right: 12,
-                        background: 'var(--diff-easy-bg)', color: 'var(--diff-easy)',
-                        borderRadius: 'var(--radius-full)', padding: '2px 8px',
-                        fontSize: 'var(--text-xs)', fontWeight: 700,
-                      }}>✓ Complete</div>
-                    )}
-
-                    <span className="track-card-icon">{track.icon}</span>
-                    <div className="track-card-title">{track.title}</div>
-                    <div className="track-card-desc">{track.description}</div>
-
-                    <div className="track-card-stats">
-                      <span className="track-stat">
-                        <Layers size={11} />
-                        {track.modules.length} modules
-                      </span>
-                      <span className="track-stat">
-                        <Clock size={11} />
-                        ~{track.estimatedHours}h
-                      </span>
-                      <span className="track-stat" style={{ marginLeft: 'auto' }}>
-                        {s}/{problems.length} solved
-                      </span>
+                    <div className="flex justify-between items-start mb-4">
+                      <h3 className="text-lg font-black tracking-tight group-hover:underline">{track.title}</h3>
+                      {completed && <span className="text-[10px] font-bold px-2 py-1 bg-black text-white rounded">DONE</span>}
                     </div>
-
-                    <ProgressBar value={pct} color={track.color} className="thin" />
-
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: '0.75rem' }}>
-                      {track.tags.map(tag => (
-                        <span key={tag} className="tag">{tag}</span>
-                      ))}
+                    <p className="text-sm text-gray-500 font-medium mb-6 flex-1">{track.description}</p>
+                    
+                    <div className="flex justify-between text-xs font-bold text-gray-400 mb-2">
+                      <span>{track.modules.length} modules</span>
+                      <span className="text-black">{pct}%</span>
+                    </div>
+                    <div className="w-full h-1 bg-gray-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-black" style={{ width: `${pct}%` }} />
                     </div>
                   </Link>
                 );

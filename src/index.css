@@ -1,1 +1,79 @@
-/* Cleared — all styles are in src/styles/index.css */
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'Inter';
+  src: url('../assets/fonts/Inter-VariableFont.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@layer base {
+  :root {
+    --background: #ffffff;
+    --foreground: #000000;
+    --muted: #f3f4f6;
+    --muted-foreground: #6b7280;
+    --border: #e5e7eb;
+    --primary: #000000;
+    --primary-foreground: #ffffff;
+  }
+
+  body {
+    background-color: white;
+    color: black;
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer components {
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    height: 2.5rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    border: 1px solid black;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+  }
+  .btn-primary {
+    background-color: black;
+    color: white;
+    border-color: transparent;
+  }
+  .btn-primary:hover {
+    background-color: #1f2937;
+  }
+  .btn-ghost {
+    background-color: transparent;
+    color: black;
+    border-color: transparent;
+  }
+  .btn-ghost:hover {
+    background-color: #f3f4f6;
+  }
+}
+
+/* Custom minimal scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #e5e7eb;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}

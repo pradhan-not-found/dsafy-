@@ -10,15 +10,16 @@ import Problems from './pages/Problems';
 import Problem from './pages/Problem';
 import Progress from './pages/Progress';
 import './styles/index.css';
+import './index.css';
 
 function Layout({ children, showSidebar = true }) {
   return (
-    <div className="app-layout">
+    <div className="flex flex-col min-h-screen bg-white text-black font-sans">
       <Navbar />
-      <div className="main-layout">
+      <div className="flex flex-1 pt-14">
         {showSidebar && <Sidebar />}
-        <main className={`page-content ${showSidebar ? 'with-sidebar' : ''}`}>
-          <div className="container">
+        <main className={`flex-1 p-6 md:p-10 transition-all ${showSidebar ? 'ml-64' : ''}`}>
+          <div className="max-w-6xl mx-auto w-full">
             {children}
           </div>
         </main>
@@ -30,9 +31,9 @@ function Layout({ children, showSidebar = true }) {
 
 function FullLayout({ children }) {
   return (
-    <div className="app-layout">
+    <div className="flex flex-col min-h-screen bg-white text-black font-sans">
       <Navbar />
-      <div style={{ paddingTop: 'var(--navbar-height)' }}>
+      <div className="pt-14 h-screen flex flex-col">
         {children}
       </div>
       <Toast />
@@ -53,10 +54,10 @@ export default function App() {
           <Route path="/problem/:problemId" element={<FullLayout><Problem /></FullLayout>} />
           <Route path="*" element={
             <Layout showSidebar={false}>
-              <div style={{ textAlign: 'center', padding: '6rem 2rem' }}>
-                <div style={{ fontSize: '5rem', marginBottom: '1rem' }}>404</div>
-                <h1 style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>Page not found</h1>
-                <a href="/" className="btn btn-primary">Go Home</a>
+              <div className="text-center py-24">
+                <div className="text-8xl font-black mb-4 tracking-tighter">404</div>
+                <h1 className="text-gray-500 mb-8 font-medium">Page not found</h1>
+                <a href="/" className="btn btn-primary">Return Home</a>
               </div>
             </Layout>
           } />

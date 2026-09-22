@@ -1,19 +1,25 @@
-import { useApp } from '../context/AppContext';
 import { Flame, Star } from 'lucide-react';
+import { useApp } from '../context/AppContext';
 
 export default function Navbar() {
   const { xp, streak } = useApp();
 
   return (
-    <div className="flex items-center gap-3 text-xs font-semibold text-[var(--app-ink)] ml-auto w-full justify-end">
-      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--app-soft)] rounded-lg border border-[var(--app-hairline)]">
-        <Flame className="size-3.5 text-orange-500" />
-        {streak} Day Streak
-      </div>
-      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--app-soft)] rounded-lg border border-[var(--app-hairline)]">
-        <Star className="size-3.5 text-yellow-500" />
-        {xp} XP
-      </div>
+    <div className="flex items-center gap-2">
+      <Chip icon={<Flame size={12} className="text-orange-400" />} label={`${streak}d streak`} />
+      <Chip icon={<Star size={12} className="text-yellow-400" />} label={`${xp} XP`} />
+    </div>
+  );
+}
+
+function Chip({ icon, label }) {
+  return (
+    <div
+      className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium"
+      style={{ background: 'var(--app-soft)', color: 'var(--app-muted)', border: '1px solid var(--app-hairline)' }}
+    >
+      {icon}
+      {label}
     </div>
   );
 }

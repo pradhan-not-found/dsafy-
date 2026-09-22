@@ -1,15 +1,16 @@
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { CheckCircle2, AlertCircle, Star, Flame, Trophy, PlayCircle } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Star, Flame, PlayCircle, Trophy } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { TRACKS, getTotalProblems } from '../data/tracks';
 import { getAllProblems, getProblemsByTrack } from '../data/problems';
 import { LiquidCard } from '../components/ui/LiquidCard';
 
-function greetingFor(hour) {
-  if (hour < 12) return "Good morning";
-  if (hour < 18) return "Good afternoon";
-  return "Good evening";
+function greeting() {
+  const h = new Date().getHours();
+  if (h < 12) return 'Good morning';
+  if (h < 18) return 'Good afternoon';
+  return 'Good evening';
 }
 
 export default function Home() {
@@ -17,164 +18,114 @@ export default function Home() {
   const { level, title, next } = getLevel();
   const allProblems = getAllProblems();
   const totalProblems = getTotalProblems();
-
   const suggested = allProblems.filter(p => getStatus(p.id) === 'unsolved').sort((a, b) => a.lcId - b.lcId).slice(0, 5);
-  const now = new Date();
-  const firstName = "Coder";
-  
-  const levelProgress = next === Infinity ? 100 : Math.round((xp / next) * 100);
+
+  const stats = [
+    { label: 'Solved',   value: solved.length,   sub: `of ${totalProblems} total`,             icon: <CheckCircle2 size={14} /> },
+    { label: 'Attempted',value: attempted.length, sub: 'keep going',                            icon: <AlertCircle size={14} /> },
+    { label: 'XP',       value: xp,               sub: next === Infinity ? 'max level' : `${next - xp} to next`, icon: <Star size={14} /> },
+    { label: 'Streak',   value: streak,           sub: 'days in a row',                         icon: <Flame size={14} /> },
+  ];
 
   return (
-    <div className="h-full flex flex-col min-h-0 w-full p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto animate-fade-in">
-      {/* Greeting section (mockup-style row) - fixed header */}
-      <div className="flex items-center justify-between gap-4 pb-4 shrink-0">
-        <div className="flex items-center gap-3.5">
-          <div className="size-10 rounded-full border border-gray-200 flex items-center justify-center shrink-0 overflow-hidden bg-gray-100 text-gray-500 font-bold">
-            C
-          </div>
-          <h1 className="font-display text-xl sm:text-2xl font-bold tracking-tight text-[var(--app-ink)]">
-            {greetingFor(now.getHours())}, {firstName}
+    <div className="p-6 max-w-5xl mx-auto flex flex-col gap-6">
+      {/* Greeting */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 style={{ fontSize: '1.25rem', fontWeight: 700, letterSpacing: '-0.03em', color: 'var(--app-ink)' }}>
+            {greeting()}, Coder
           </h1>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <div className="text-xs font-semibold px-3 py-1.5 rounded-full bg-[var(--app-soft)] border border-[var(--app-hairline)] text-[var(--app-ink)]">
-            Lv. {level} {title}
-          </div>
+          <p className="label mt-0.5">Lv. {level} — {title}</p>
         </div>
       </div>
 
-      {/* Scrollable Cards Area */}
-      <div className="flex-1 overflow-y-auto no-scrollbar py-4 sm:py-6 flex flex-col gap-4 sm:gap-6 pb-12 sm:pb-16 lg:pb-20">
-        {/* Activity overview */}
-        <div>
-          <div className="mb-2">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--app-muted)]">Activity Overview</p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            <AnalyticsBlock
-              index={0}
-              numericValue={solved.length}
-              label="Total Solved"
-              icon={<CheckCircle2 className="size-4 text-[var(--app-ink)]" />}
-              subtitle={`${totalProblems - solved.length - attempted.length} remaining to master`}
-            />
-            <AnalyticsBlock
-              index={1}
-              numericValue={attempted.length}
-              label="Attempted"
-              icon={<AlertCircle className="size-4 text-[var(--app-ink)]" />}
-              subtitle="Keep trying!"
-            />
-            <AnalyticsBlock
-              index={2}
-              numericValue={xp}
-              label="Total XP"
-              icon={<Star className="size-4 text-[var(--app-ink)]" />}
-              subtitle={`${next === Infinity ? 'Max Level' : `${next - xp} XP to next level`}`}
-            />
-            <AnalyticsBlock
-              index={3}
-              numericValue={streak}
-              label="Current Streak"
-              icon={<Flame className="size-4 text-[var(--app-ink)]" />}
-              subtitle="Days in a row"
-            />
-          </div>
-        </div>
-
-        {/* Top Models + Provider Usage (Re-mapped to Tracks & Suggested) */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-          {/* Active Tracks */}
-          <LiquidCard index={4} className="p-4 sm:p-6">
-            <div className="flex items-center justify-between mb-4 sm:mb-5">
-              <h2 className="text-base sm:text-lg font-semibold text-[var(--app-ink)]">Active Tracks</h2>
-              <Link to="/tracks" className="text-[10px] sm:text-xs font-medium text-[var(--app-muted)] uppercase tracking-wide hover:text-[var(--app-ink)] transition-colors">View All</Link>
+      {/* Stats row */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {stats.map((s, i) => (
+          <LiquidCard key={s.label} index={i} className="p-4 flex flex-col gap-1">
+            <div className="flex items-center justify-between">
+              <span className="label">{s.label}</span>
+              <span style={{ color: 'var(--app-subtle)' }}>{s.icon}</span>
             </div>
-            <div className="flex flex-col gap-2">
-              {TRACKS.slice(0, 4).map((track, i) => {
-                const trackProblems = getProblemsByTrack(track.id);
-                const s = trackProblems.filter(p => getStatus(p.id) === 'solved').length;
-                const pct = trackProblems.length ? Math.round((s / trackProblems.length) * 100) : 0;
-                
-                return (
-                  <Link key={track.id} to={`/tracks/${track.id}`} className="flex items-center gap-3 rounded-lg bg-[var(--app-canvas)] border border-[var(--app-hairline)] hover:border-gray-300 p-2.5 transition-colors group">
-                    <div className="size-8 rounded-md bg-[var(--app-soft)] flex items-center justify-center shrink-0 border border-[var(--app-hairline)] group-hover:bg-black group-hover:text-white transition-colors">
-                      <Trophy className="size-4" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm font-medium text-[var(--app-ink)] truncate">{track.title}</span>
-                        <span className="text-xs font-semibold text-[var(--app-ink)] shrink-0">{pct}%</span>
-                      </div>
-                      <div className="flex items-center justify-between text-[10px] text-[var(--app-muted)] mb-1">
-                        <span>{s}/{track.totalProblems} solved</span>
-                        <span>{track.difficulty}</span>
-                      </div>
-                      <div className="h-1.5 bg-[var(--app-hairline)] rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-[var(--app-ink)] rounded-full transition-all"
-                          style={{ width: `${pct}%` }}
-                        />
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
+            <div style={{ fontSize: '1.75rem', fontWeight: 700, letterSpacing: '-0.04em', color: 'var(--app-ink)', lineHeight: 1.1 }}>
+              {s.value}
             </div>
+            <p style={{ fontSize: '11px', color: 'var(--app-muted)' }}>{s.sub}</p>
           </LiquidCard>
+        ))}
+      </div>
 
-          {/* Suggested Next */}
-          <LiquidCard index={5} className="p-4 sm:p-6">
-            <div className="flex items-center justify-between mb-4 sm:mb-5">
-              <h2 className="text-base sm:text-lg font-semibold text-[var(--app-ink)]">Suggested Next</h2>
-              <Link to="/problems" className="text-[10px] sm:text-xs font-medium text-[var(--app-muted)] uppercase tracking-wide hover:text-[var(--app-ink)] transition-colors">Browse All</Link>
-            </div>
-            <div className="flex flex-col gap-2">
-              {suggested.length === 0 ? (
-                <p className="text-sm text-[var(--app-muted)]">You've solved everything!</p>
-              ) : (
-                suggested.map((p, i) => (
-                  <Link key={p.id} to={`/problem/${p.id}`} className="flex items-center gap-3 rounded-lg bg-[var(--app-canvas)] border border-[var(--app-hairline)] hover:border-gray-300 p-2.5 transition-colors group">
-                    <div className="size-8 rounded-md bg-[var(--app-soft)] flex items-center justify-center shrink-0 border border-[var(--app-hairline)] group-hover:bg-black group-hover:text-white transition-colors text-xs font-bold">
-                      {p.lcId}
+      {/* Main two-column */}
+      <div className="grid md:grid-cols-2 gap-4">
+        {/* Active tracks */}
+        <LiquidCard index={4} className="p-5">
+          <div className="flex items-center justify-between mb-4">
+            <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--app-ink)' }}>Active Tracks</span>
+            <Link to="/tracks" className="label hover:opacity-70 transition-opacity">View all →</Link>
+          </div>
+          <div className="flex flex-col gap-4">
+            {TRACKS.slice(0, 5).map((track, i) => {
+              const probs = getProblemsByTrack(track.id);
+              const s = probs.filter(p => getStatus(p.id) === 'solved').length;
+              const pct = probs.length ? Math.round((s / probs.length) * 100) : 0;
+              return (
+                <Link key={track.id} to={`/tracks/${track.id}`} className="group flex items-start gap-3">
+                  <div
+                    className="size-7 rounded-md flex items-center justify-center shrink-0 mt-0.5"
+                    style={{ background: 'var(--app-soft)', border: '1px solid var(--app-hairline)' }}
+                  >
+                    <Trophy size={12} style={{ color: 'var(--app-muted)' }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-center mb-1">
+                      <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--app-ink)' }} className="truncate">{track.title}</span>
+                      <span className="label shrink-0 ml-2">{s}/{track.totalProblems}</span>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm font-medium text-[var(--app-ink)] capitalize truncate">{p.title}</span>
-                        <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-[var(--app-ink)] text-[var(--app-canvas)] shrink-0 uppercase">{p.difficulty}</span>
-                      </div>
-                      <div className="text-[10px] text-[var(--app-muted)] truncate mb-1">
-                        {p.track.replace(/-/g, ' ')}
-                      </div>
+                    <div className="progress-bar-bg">
+                      <div className="progress-bar-fill" style={{ width: `${pct}%` }} />
                     </div>
-                    <div className="shrink-0 text-[var(--app-muted)] group-hover:text-black transition-colors pl-2">
-                      <PlayCircle className="size-5" />
-                    </div>
-                  </Link>
-                ))
-              )}
-            </div>
-          </LiquidCard>
-        </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </LiquidCard>
+
+        {/* Suggested next */}
+        <LiquidCard index={5} className="p-5">
+          <div className="flex items-center justify-between mb-4">
+            <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--app-ink)' }}>Suggested Next</span>
+            <Link to="/problems" className="label hover:opacity-70 transition-opacity">Browse all →</Link>
+          </div>
+          <div className="flex flex-col gap-1">
+            {suggested.length === 0
+              ? <p style={{ fontSize: '12px', color: 'var(--app-muted)' }}>You've solved everything — impressive!</p>
+              : suggested.map((p, i) => (
+                <Link
+                  key={p.id}
+                  to={`/problem/${p.id}`}
+                  className="flex items-center gap-3 px-3 py-2 rounded-lg group transition-all"
+                  style={{ borderBottom: i < suggested.length - 1 ? '1px solid var(--app-hairline)' : 'none' }}
+                >
+                  <span
+                    className="size-7 flex items-center justify-center rounded shrink-0 font-mono text-[10px] font-bold"
+                    style={{ background: 'var(--app-soft)', color: 'var(--app-muted)' }}
+                  >
+                    {p.lcId}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p style={{ fontSize: '12px', fontWeight: 600, color: 'var(--app-ink)' }} className="truncate">{p.title}</p>
+                    <p style={{ fontSize: '10px', color: 'var(--app-subtle)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                      {p.difficulty}
+                    </p>
+                  </div>
+                  <PlayCircle size={14} style={{ color: 'var(--app-subtle)', flexShrink: 0 }} />
+                </Link>
+              ))
+            }
+          </div>
+        </LiquidCard>
       </div>
     </div>
-  );
-}
-
-function AnalyticsBlock({ numericValue, label, icon, subtitle, index }) {
-  return (
-    <LiquidCard index={index} className="p-4 sm:p-5 flex flex-col">
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-[10px] sm:text-xs font-medium text-[var(--app-muted)] uppercase tracking-wide">{label}</span>
-        <span className="inline-flex items-center justify-center size-7">
-          {icon}
-        </span>
-      </div>
-      <div className="text-2xl sm:text-3xl font-semibold text-[var(--app-ink)] tracking-tight tabular-nums">
-        {numericValue}
-      </div>
-      <p className="text-[10px] sm:text-xs text-[var(--app-muted)] mt-1 truncate">{subtitle}</p>
-    </LiquidCard>
   );
 }

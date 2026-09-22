@@ -1,72 +1,103 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, List, Code2, LineChart, LogOut, ChevronUp } from 'lucide-react';
-import { cn } from '../lib/utils';
+import { LayoutDashboard, BookOpen, Code2, BarChart2, ChevronUp } from 'lucide-react';
+import { useApp } from '../context/AppContext';
+import { TRACKS, getTotalProblems } from '../data/tracks';
+import { getProblemsByTrack } from '../data/problems';
+
+const NAV = [
+  { label: 'Dashboard', path: '/',         icon: LayoutDashboard },
+  { label: 'Tracks',    path: '/tracks',   icon: BookOpen },
+  { label: 'Problems',  path: '/problems', icon: Code2 },
+  { label: 'Progress',  path: '/progress', icon: BarChart2 },
+];
 
 export default function Sidebar() {
-  const location = useLocation();
-
-  const links = [
-    { name: 'Dashboard', path: '/', icon: <Home size={18} /> },
-    { name: 'Tracks', path: '/tracks', icon: <List size={18} /> },
-    { name: 'Problems', path: '/problems', icon: <Code2 size={18} /> },
-    { name: 'Progress', path: '/progress', icon: <LineChart size={18} /> },
-  ];
+  const { pathname } = useLocation();
+  const { getStatus, getLevel, xp } = useApp();
+  const { level, title, next } = getLevel();
+  const xpPct = next === Infinity ? 100 : Math.round((xp / next) * 100);
 
   return (
-    <div className="w-64 bg-transparent border-r-0 flex flex-col h-full z-40 fixed left-0 top-0 bottom-0 py-4 px-3">
-      {/* Logo */}
-      <div className="flex items-center gap-3 px-2 mb-8 mt-2">
-        <div className="size-9 rounded-xl bg-black flex items-center justify-center shrink-0">
-          <Code2 className="size-5 text-white" />
+    <aside
+      className="fixed inset-y-0 left-0 flex flex-col"
+      style={{
+        width: 'var(--sidebar-w)',
+        background: 'var(--app-canvas)',
+        borderRight: '1px solid var(--app-hairline)',
+        zIndex: 40,
+      }}
+    >
+      {/* Brand */}
+      <div className="flex items-center gap-2.5 px-4 py-5 shrink-0">
+        <div
+          className="size-8 rounded-lg flex items-center justify-center shrink-0"
+          style={{ background: 'var(--app-ink)' }}
+        >
+          <Code2 size={16} color="#fff" />
         </div>
-        <div className="flex flex-col leading-[1.1]">
-          <span className="text-lg font-semibold tracking-tight text-[var(--app-ink)]">DSAfy</span>
-        </div>
+        <span style={{ fontWeight: 700, fontSize: '1rem', letterSpacing: '-0.03em', color: 'var(--app-ink)' }}>
+          DSAfy
+        </span>
       </div>
 
-      {/* Nav Links */}
-      <div className="flex flex-col gap-1 flex-1">
-        {links.map(link => {
-          const isActive = location.pathname === link.path || (link.path !== '/' && location.pathname.startsWith(link.path));
+      {/* Nav links */}
+      <nav className="flex-1 flex flex-col gap-0.5 px-3 overflow-y-auto">
+        <p className="label px-2 mb-2 mt-1">Navigation</p>
+        {NAV.map(({ label, path, icon: Icon }) => {
+          const active = path === '/' ? pathname === '/' : pathname.startsWith(path);
           return (
             <Link
-              key={link.name}
-              to={link.path}
-              className={cn(
-                "rounded-xl transition-all duration-200 py-2.5 px-3 flex items-center gap-3 font-medium text-sm tracking-tight",
-                isActive 
-                  ? "bg-white shadow-[0_1px_2px_rgba(0,0,0,0.05)] border border-[var(--app-hairline)] text-[var(--app-ink)] font-semibold"
-                  : "text-[var(--app-muted)] hover:bg-[var(--app-soft)]/50 hover:text-[var(--app-ink)] border border-transparent"
-              )}
+              key={path}
+              to={path}
+              className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all ${active ? 'nav-active' : 'nav-idle'}`}
             >
-              <div className="shrink-0">{link.icon}</div>
-              <span>{link.name}</span>
+              <Icon size={15} style={{ flexShrink: 0 }} />
+              {label}
             </Link>
           );
         })}
-      </div>
 
-      {/* Footer Profile */}
-      <div className="mt-auto pt-4 pb-2">
-        <button
-          className={cn(
-            "liquid-card-shell group flex items-center gap-3 rounded-xl p-2 transition-all w-full text-left"
-          )}
-        >
-          {/* Avatar */}
-          <div className="size-9 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center shrink-0 overflow-hidden text-gray-500 font-bold">
-            C
+        {/* Track Progress */}
+        <p className="label px-2 mt-5 mb-2">Track Progress</p>
+        <div className="flex flex-col gap-3 px-1">
+          {TRACKS.map(track => {
+            const probs = getProblemsByTrack(track.id);
+            const s = probs.filter(p => getStatus(p.id) === 'solved').length;
+            const pct = probs.length ? Math.round((s / probs.length) * 100) : 0;
+            return (
+              <Link key={track.id} to={`/tracks/${track.id}`} className="group">
+                <div className="flex justify-between items-center mb-1">
+                  <span
+                    className="text-[11px] font-medium truncate group-hover:opacity-100"
+                    style={{ color: 'var(--app-muted)', maxWidth: '140px' }}
+                  >
+                    {track.title}
+                  </span>
+                  <span className="text-[10px] font-semibold" style={{ color: 'var(--app-subtle)' }}>{pct}%</span>
+                </div>
+                <div className="progress-bar-bg">
+                  <div className="progress-bar-fill" style={{ width: `${pct}%` }} />
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
+
+      {/* Footer: XP Level */}
+      <div className="shrink-0 px-3 pb-4 pt-3" style={{ borderTop: '1px solid var(--app-hairline)' }}>
+        <div className="px-2 py-2 rounded-lg" style={{ background: 'var(--app-soft)' }}>
+          <div className="flex justify-between items-center mb-1.5">
+            <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--app-ink)' }}>
+              Lv. {level} — {title}
+            </span>
+            <span className="label" style={{ letterSpacing: '0' }}>{xp} XP</span>
           </div>
-
-          {/* Name */}
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-[var(--app-ink)] truncate">Coder</p>
-            <p className="text-[11px] text-[var(--app-muted)] truncate">Level 1 - Novice</p>
+          <div className="progress-bar-bg">
+            <div className="progress-bar-fill" style={{ width: `${xpPct}%` }} />
           </div>
-
-          <ChevronUp className="size-4 text-[var(--app-muted)] mr-1" />
-        </button>
+        </div>
       </div>
-    </div>
+    </aside>
   );
 }

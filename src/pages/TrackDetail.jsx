@@ -5,7 +5,7 @@ import { useApp } from '../context/AppContext';
 import ProgressBar from '../components/ProgressBar';
 import DifficultyBadge from '../components/DifficultyBadge';
 import StatusIcon from '../components/StatusIcon';
-import { ArrowLeft, Clock, Layers, CheckCircle2, Lock, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Clock, Layers, CheckCircle2, Lock, ChevronRight, BookOpen } from 'lucide-react';
 
 export default function TrackDetail() {
   const { trackId } = useParams();
@@ -102,6 +102,24 @@ export default function TrackDetail() {
               </div>
 
               <p className="module-desc">{mod.description}</p>
+
+              {mod.tutorial && (
+                <details style={{ marginBottom: '1rem' }}>
+                  <summary style={{ cursor: 'pointer', fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--brand-primary)', listStyle: 'none', display: 'flex', alignItems: 'center', gap: '0.25rem', userSelect: 'none' }}>
+                    <BookOpen size={14} /> View Topic Tutorial
+                  </summary>
+                  <div style={{ marginTop: '0.75rem', padding: '1rem', background: 'var(--bg-input)', borderRadius: 'var(--radius-md)', fontSize: 'var(--text-sm)', color: 'var(--text-primary)', lineHeight: 1.6 }}>
+                    {mod.tutorial.split('\n').map((line, i) => {
+                      if (line.startsWith('### ')) return <h3 key={i} style={{ marginTop: i === 0 ? 0 : '1rem', marginBottom: '0.5rem', fontSize: '1.05rem', color: 'var(--text-primary)' }}>{line.replace('### ', '')}</h3>;
+                      if (line.startsWith('- **')) return <li key={i} style={{ marginLeft: '1rem', marginBottom: '0.25rem' }} dangerouslySetInnerHTML={{ __html: line.substring(2).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />;
+                      if (line.startsWith('- ')) return <li key={i} style={{ marginLeft: '1rem', marginBottom: '0.25rem' }}>{line.substring(2)}</li>;
+                      if (line.match(/^\d+\.\s\*\*/)) return <li key={i} style={{ marginLeft: '1rem', listStyleType: 'decimal', marginBottom: '0.25rem' }} dangerouslySetInnerHTML={{ __html: line.replace(/^\d+\.\s/, '').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />;
+                      if (line.startsWith('`') && line.endsWith('`')) return <code key={i} style={{ background: 'var(--bg-card)', padding: '2px 4px', borderRadius: 4, fontFamily: 'var(--font-mono)' }}>{line.slice(1, -1)}</code>;
+                      return line.trim() ? <p key={i} style={{ marginBottom: '0.5rem' }} dangerouslySetInnerHTML={{ __html: line.replace(/`([^`]+)`/g, '<code style="background:var(--bg-card);padding:2px 4px;border-radius:4px;font-family:var(--font-mono)">$1</code>') }} /> : null;
+                    })}
+                  </div>
+                </details>
+              )}
 
               <ProgressBar value={modPct} color={track.color} className="thin" />
 

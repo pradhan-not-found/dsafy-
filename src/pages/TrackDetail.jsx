@@ -94,12 +94,9 @@ export default function TrackDetail() {
               </p>
 
               {mod.tutorial && (
-                <details className="mb-6 group">
-                  <summary className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--app-muted)] hover:text-[var(--app-ink)] cursor-pointer transition-colors list-none">
-                    <ChevronRight size={14} className="group-open:rotate-90 transition-transform" />
-                    Read Tutorial
-                  </summary>
-                  <div className="mt-4 p-5 rounded-lg bg-[var(--app-canvas)] border border-[var(--app-hairline)] text-sm text-[var(--app-ink)] leading-relaxed prose prose-sm max-w-none prose-p:leading-relaxed prose-pre:bg-[var(--app-soft)] prose-pre:text-[var(--app-ink)]">
+                <div className="mb-6">
+                  <h4 className="text-[10px] font-semibold uppercase tracking-wider text-[var(--app-muted)] mb-3">Concepts to Master</h4>
+                  <div className="p-5 rounded-lg bg-[var(--app-canvas)] border border-[var(--app-hairline)] text-sm text-[var(--app-ink)] leading-relaxed prose prose-sm max-w-none prose-p:leading-relaxed prose-pre:bg-[var(--app-soft)] prose-pre:text-[var(--app-ink)]">
                     {mod.tutorial.split('\n').map((line, i) => {
                       if (line.startsWith('### ')) return <h3 key={i} className="font-semibold text-[var(--app-ink)] mt-6 mb-3">{line.replace('### ', '')}</h3>;
                       if (line.startsWith('- **')) return <li key={i} className="ml-4 mb-1.5" dangerouslySetInnerHTML={{ __html: line.substring(2).replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold">$1</strong>') }} />;
@@ -109,7 +106,7 @@ export default function TrackDetail() {
                       return line.trim() ? <p key={i} className="mb-3" dangerouslySetInnerHTML={{ __html: line.replace(/`([^`]+)`/g, '<code class="bg-[var(--app-soft)] px-1.5 py-0.5 rounded border border-[var(--app-hairline)] font-mono text-xs">$1</code>').replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold">$1</strong>') }} /> : null;
                     })}
                   </div>
-                </details>
+                </div>
               )}
 
               <div className="h-1.5 bg-[var(--app-soft)] rounded-full overflow-hidden mb-6">

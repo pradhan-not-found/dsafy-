@@ -116,6 +116,12 @@ export default function Problem() {
               Description
             </button>
             <button 
+              className={`px-4 py-2 text-xs font-semibold uppercase tracking-wider border-b-2 transition-colors ${activeTab === 'strategy' ? 'border-[var(--app-ink)] text-[var(--app-ink)]' : 'border-transparent text-[var(--app-muted)] hover:text-[var(--app-ink)]'}`}
+              onClick={() => setActiveTab('strategy')}
+            >
+              Study Strategy
+            </button>
+            <button 
               className={`px-4 py-2 text-xs font-semibold uppercase tracking-wider border-b-2 transition-colors ${activeTab === 'result' ? 'border-[var(--app-ink)] text-[var(--app-ink)]' : 'border-transparent text-[var(--app-muted)] hover:text-[var(--app-ink)]'}`}
               onClick={() => setActiveTab('result')}
             >
@@ -147,6 +153,25 @@ export default function Problem() {
                       </div>
                     ))}
                   </div>
+                </div>
+              </div>
+            )}
+            {activeTab === 'strategy' && (
+              <div className="text-sm leading-relaxed space-y-6">
+                <div>
+                  <h3 className="text-[10px] font-semibold uppercase tracking-wider text-[var(--app-muted)] mb-3">What You Need To Study</h3>
+                  <ul className="list-disc pl-5 space-y-2 text-[var(--app-ink)]">
+                    <li><strong>Core Concept:</strong> Focus on understanding how the optimal approach reduces time complexity from O(N²) to O(N) or O(log N).</li>
+                    <li><strong>Pattern Recognition:</strong> Identify if this problem fits standard templates like Two Pointers, Sliding Window, or Fast/Slow pointers.</li>
+                    <li><strong>Edge Cases:</strong> Always consider empty inputs, negative numbers, or constraints bounds before writing code.</li>
+                  </ul>
+                </div>
+                <div className="pt-5 border-t border-[var(--app-hairline)]">
+                  <h3 className="text-[10px] font-semibold uppercase tracking-wider text-[var(--app-muted)] mb-3">What You Don't Need To Worry About</h3>
+                  <ul className="list-disc pl-5 space-y-2 text-[var(--app-ink)]">
+                    <li className="text-[var(--app-muted)]">Memorizing the exact syntax of obscure standard library methods.</li>
+                    <li className="text-[var(--app-muted)]">Over-optimizing space complexity if it compromises code readability during a primary interview round.</li>
+                  </ul>
                 </div>
               </div>
             )}

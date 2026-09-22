@@ -4,6 +4,8 @@ import { getProblemsByModule, getProblemsByTrack } from '../data/problems';
 import { useApp } from '../context/AppContext';
 import { LiquidCard } from '../components/ui/LiquidCard';
 import { PlayCircle, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 export default function TrackDetail() {
   const { trackId } = useParams();
@@ -96,15 +98,10 @@ export default function TrackDetail() {
               {mod.tutorial && (
                 <div className="mb-6">
                   <h4 className="text-[10px] font-semibold uppercase tracking-wider text-[var(--app-muted)] mb-3">Concepts to Master</h4>
-                  <div className="p-5 rounded-lg bg-[var(--app-canvas)] border border-[var(--app-hairline)] text-sm text-[var(--app-ink)] leading-relaxed prose prose-sm max-w-none prose-p:leading-relaxed prose-pre:bg-[var(--app-soft)] prose-pre:text-[var(--app-ink)]">
-                    {mod.tutorial.split('\n').map((line, i) => {
-                      if (line.startsWith('### ')) return <h3 key={i} className="font-semibold text-[var(--app-ink)] mt-6 mb-3">{line.replace('### ', '')}</h3>;
-                      if (line.startsWith('- **')) return <li key={i} className="ml-4 mb-1.5" dangerouslySetInnerHTML={{ __html: line.substring(2).replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold">$1</strong>') }} />;
-                      if (line.startsWith('- ')) return <li key={i} className="ml-4 mb-1.5">{line.substring(2)}</li>;
-                      if (line.match(/^\d+\.\s\*\*/)) return <li key={i} className="ml-4 list-decimal mb-1.5" dangerouslySetInnerHTML={{ __html: line.replace(/^\d+\.\s/, '').replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold">$1</strong>') }} />;
-                      if (line.startsWith('`') && line.endsWith('`')) return <code key={i} className="bg-[var(--app-soft)] px-1.5 py-0.5 rounded border border-[var(--app-hairline)] font-mono text-xs">{line.slice(1, -1)}</code>;
-                      return line.trim() ? <p key={i} className="mb-3" dangerouslySetInnerHTML={{ __html: line.replace(/`([^`]+)`/g, '<code class="bg-[var(--app-soft)] px-1.5 py-0.5 rounded border border-[var(--app-hairline)] font-mono text-xs">$1</code>').replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold">$1</strong>') }} /> : null;
-                    })}
+                  <div className="p-5 rounded-lg bg-[var(--app-canvas)] border border-[var(--app-hairline)] text-sm text-[var(--app-ink)] leading-relaxed prose prose-sm max-w-none prose-p:leading-relaxed prose-pre:bg-[var(--app-soft)] prose-pre:text-[var(--app-ink)] prose-th:text-left prose-table:w-auto prose-td:px-4 prose-th:px-4 prose-tr:border-b prose-tr:border-[var(--app-hairline)]">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {mod.tutorial}
+                    </ReactMarkdown>
                   </div>
                 </div>
               )}

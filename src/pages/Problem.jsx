@@ -4,6 +4,8 @@ import Editor from '@monaco-editor/react';
 import { getProblemById } from '../data/problems';
 import { useApp } from '../context/AppContext';
 import { PlayCircle, CheckCircle2, ChevronLeft } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 export default function Problem() {
   const { problemId } = useParams();
@@ -132,15 +134,11 @@ export default function Problem() {
           <div className="flex-1 overflow-y-auto p-6 no-scrollbar">
             {activeTab === 'description' && (
               <div className="text-sm leading-relaxed space-y-4">
-                <div 
-                  className="prose prose-sm max-w-none text-[var(--app-ink)] prose-p:leading-relaxed prose-pre:bg-[var(--app-soft)] prose-pre:text-[var(--app-ink)]"
-                  dangerouslySetInnerHTML={{ 
-                    __html: problem.description
-                      .replace(/\n/g, '<br />')
-                      .replace(/`([^`]+)`/g, '<code class="bg-[var(--app-soft)] px-1.5 py-0.5 rounded-md font-mono text-xs border border-[var(--app-hairline)]">$1</code>')
-                      .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold">$1</strong>') 
-                  }} 
-                />
+                <div className="prose prose-sm max-w-none text-[var(--app-ink)] prose-p:leading-relaxed prose-pre:bg-[var(--app-soft)] prose-pre:text-[var(--app-ink)] prose-th:text-left prose-table:w-auto prose-td:px-4 prose-th:px-4 prose-tr:border-b prose-tr:border-[var(--app-hairline)]">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {problem.description}
+                  </ReactMarkdown>
+                </div>
                 
                 <div className="pt-6 mt-6 border-t border-[var(--app-hairline)]">
                   <h3 className="text-sm font-semibold mb-4 uppercase tracking-wider text-[var(--app-muted)]">Examples</h3>
